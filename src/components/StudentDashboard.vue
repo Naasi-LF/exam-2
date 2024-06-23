@@ -1,13 +1,17 @@
 <template>
-  <div class="student-dashboard">
-    <div class="profile">
-      <img src="@/assets/head.png" alt="Profile Image" @click="toggleMenu" class="profile-image">
-      <span class="welcome-message">{{ studentName }}同学，欢迎登录</span>
+  <div>
+    <div class="student-dashboard">
+      <div class="profile">
+        <img src="@/assets/head.png" alt="Profile Image" @click="toggleMenu" class="profile-image">
+        <span class="welcome-message">{{ studentName }}同学，欢迎登录</span>
+      </div>
+      <div v-if="showMenu" class="menu">
+        <button class="menu-button" @click="goToUpdateInfo">修改信息</button>
+        <button class="menu-button logout-button" @click="confirmLogout">注销</button>
+        <button class="menu-button exit-button" @click="exit">退出</button>
+      </div>
     </div>
-    <div v-if="showMenu" class="menu">
-      <button class="menu-button" @click="goToUpdateInfo">修改信息</button>
-      <button class="menu-button logout-button" @click="confirmLogout">注销</button>
-    </div>
+    <router-view></router-view> <!-- 子路由内容显示在这里 -->
   </div>
 </template>
 
@@ -25,9 +29,16 @@ export default {
     toggleMenu() {
       this.showMenu = !this.showMenu;
     },
+
     goToUpdateInfo() {
-      this.$router.push({ name: 'UpdateInfo' }); // 确保路由和组件设置正确
+      const currentRoute = this.$route.name;
+      if (currentRoute === 'UpdateInfo') {
+        this.$router.replace({ name: 'StudentDashboard' }); // 导航到一个中间状态
+      } else {
+        this.$router.push({ name: 'UpdateInfo' }); // 导航到修改信息页面
+      }
     },
+
     confirmLogout() {
       if (confirm("是否确定注销，注销后无法回退！")) {
         const studentId = sessionStorage.getItem('studentId');  // 获取学生ID
@@ -56,6 +67,12 @@ export default {
           alert('注销失败: ' + (error.response ? error.response.data : '服务器不可达'));
         });
       }
+    },
+    exit() {
+      // 清除 sessionStorage 中的所有数据
+      sessionStorage.clear();
+      // 跳转到登录页面
+      this.$router.push('/');
     },
     fetchStudentInfo() {
       const studentId = sessionStorage.getItem('studentId');
@@ -111,7 +128,6 @@ export default {
   font-family: 'Arial', sans-serif;
 }
 
-
 .menu {
   display: flex;
   flex-direction: column;
@@ -144,6 +160,10 @@ export default {
   border-color: #f44336;
 }
 
+.menu-button.exit-button {
+  border-color: #1a73e8;
+}
+
 .menu-button:hover {
   background-color: #4CAF50;
   color: white;
@@ -154,5 +174,11 @@ export default {
   background-color: #f44336;
   color: white;
   border-color: #e53935;
+}
+
+.menu-button.exit-button:hover {
+  background-color: #1a73e8;
+  color: white;
+  border-color: #0b5ed7;
 }
 </style>

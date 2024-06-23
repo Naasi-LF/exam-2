@@ -4,7 +4,12 @@ import UserLogin from '../components/UserLogin.vue';
 import UserRegister from '../components/UserRegister.vue';
 import StudentDashboard from '../components/StudentDashboard.vue';
 import TeacherDashboard from '../components/TeacherDashboard.vue';
-import UpdateInfo from '../components/UpdateInfo.vue';  // 引入修改信息组件
+import UpdateInfo from '../components/UpdateInfo.vue';
+import AddQuestion from '../components/AddQuestion.vue';
+import PublishExam from '../components/PublishExam.vue';
+import ManageStudents from '../components/ManageStudents.vue';
+import ExamScores from '../components/ExamScores.vue';
+import EmailNotification from '../components/EmailNotification.vue';
 
 Vue.use(Router);
 
@@ -26,34 +31,64 @@ const router = new Router({
       path: '/student-dashboard',
       name: 'StudentDashboard',
       component: StudentDashboard,
-      meta: { requiresAuth: true }  // 需要登录才能访问
+      meta: { requiresAuth: true },  // 需要登录才能访问
+      children: [
+        {
+          path: 'update-info',  // 作为子路由
+          name: 'UpdateInfo',
+          component: UpdateInfo  // 指定对应的组件
+        }
+      ]
     },
     {
       path: '/teacher-dashboard',
       name: 'TeacherDashboard',
       component: TeacherDashboard,
-      meta: { requiresAuth: true }  // 需要登录才能访问
+      meta: { requiresAuth: true },  // 需要登录才能访问
+      children: [
+        {
+          path: 'add-question',
+          name: 'AddQuestion',
+          component: AddQuestion
+        },
+        {
+          path: 'publish-exam',
+          name: 'PublishExam',
+          component: PublishExam
+        },
+        {
+          path: 'manage-students',
+          name: 'ManageStudents',
+          component: ManageStudents
+        },
+        {
+          path: 'exam-scores',
+          name: 'ExamScores',
+          component: ExamScores
+        },
+        {
+          path: 'email-notification',
+          name: 'EmailNotification',
+          component: EmailNotification
+        }
+      ]
     },
-    {
-      path: '/update-info',  // 定义新的路由路径
-      name: 'UpdateInfo',
-      component: UpdateInfo  // 指定对应的组件
-    }
+
   ]
 });
+
 // 添加全局导航守卫
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // 这里检查 sessionStorage 中是否存在 token
     const token = sessionStorage.getItem('authToken');
     if (!token) {
-      // 如果没有 token，重定向到登录页面
       next({ name: 'UserLogin' });
     } else {
-      next(); // 如果有 token，则继续访问目标页面
+      next();
     }
   } else {
-    next(); // 如果目标页面不需要认证，则继续访问
+    next();
   }
 });
+
 export default router;
