@@ -2,8 +2,8 @@
   <div class="teacher-dashboard-wrapper">
     <aside class="sidebar">
       <div class="profile">
-        <img src="@/assets/head2.png" alt="Profile Image" class="profile-image">
-        <h2 class="welcome-message">💎💎教师系统💎💎</h2>
+        <img src="@/assets/head3.png" alt="Profile Image" class="profile-image">
+        <h2 class="welcome-message">教师管理平台</h2>
       </div>
       <nav class="menu">
         <router-link to="/teacher-dashboard/add-question" class="menu-item">添加题目</router-link>
@@ -34,7 +34,7 @@ export default {
 
 .sidebar {
   width: 200px; /* 菜单栏宽度 */
-  background-color: #007BFF;
+  background-color: #6eaef3;
   color: white;
   padding: 20px;
   display: flex;
@@ -50,16 +50,19 @@ export default {
 }
 
 .profile-image {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   margin-bottom: 10px;
 }
 
 .welcome-message {
-  font-size: 1.2em;
   margin-bottom: 20px;
   text-align: center;
+    /* 添加字体样式 */
+  font-family: 'Arial', sans-serif;
+  font-size: 25px; /* 设置字体大小 */
+  font-weight: bold; /* 设置字体粗细 */
 }
 
 .menu {
@@ -74,9 +77,13 @@ export default {
   text-align: center;
   text-decoration: none;
   color: white;
-  background-color: #0056b3;
+  background-color: #2186f2;
   border-radius: 5px;
   transition: background-color 0.3s;
+    /* 添加字体样式 */
+  font-family: 'Arial', sans-serif;
+  font-size: 16px; /* 设置字体大小 */
+  font-weight: bold; /* 设置字体粗细 */
 }
 
 .menu-item:hover {
@@ -88,5 +95,6 @@ export default {
   padding: 20px;
   background-color: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
 }
 </style>
