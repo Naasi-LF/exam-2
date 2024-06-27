@@ -57,7 +57,7 @@ export default {
         }
       })
       .then(response => {
-        console.log('Login successful:', response.data);
+        console.log('登陆成功');
         this.message = response.data.message;
         this.success = true;
         sessionStorage.setItem('studentId', studentId);  // 确保保存正确的studentId

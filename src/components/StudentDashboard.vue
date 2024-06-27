@@ -11,6 +11,20 @@
         <button class="menu-button exit-button" @click="exit">退出</button>
       </div>
     </div>
+    <!-- 新增显示考试列表 -->
+    <!-- 显示考试列表 -->
+      <div v-if="exams.length > 0" class="exams-list">
+        <h3 class="exams-title">可参加的考试:</h3>
+        <ul>
+          <li v-for="exam in exams" :key="exam.examId">
+            <span class="exam-name">{{ exam.examName }}</span> - 
+            <span class="exam-time">从 {{ formatDate(exam.startTime) }} 到 {{ formatDate(exam.endTime) }}</span>
+            <button v-if="isExamAvailable(exam.startTime)" @click="enterExam(exam.examId)">进入考试</button>
+            <span v-else class="countdown">{{ countdown(exam.startTime) }}</span>
+          </li>
+        </ul>
+      </div>
+
     <router-view></router-view> <!-- 子路由内容显示在这里 -->
   </div>
 </template>
@@ -22,7 +36,8 @@ export default {
   data() {
     return {
       studentName: '', // 从后端获取
-      showMenu: false
+      showMenu: false,
+      exams: [], // 存储考试列表
     };
   },
   methods: {
@@ -68,12 +83,12 @@ export default {
         });
       }
     },
+
     exit() {
-      // 清除 sessionStorage 中的所有数据
       sessionStorage.clear();
-      // 跳转到登录页面
       this.$router.push('/');
     },
+
     fetchStudentInfo() {
       const studentId = sessionStorage.getItem('studentId');
 
@@ -91,13 +106,53 @@ export default {
         console.error('获取学生信息失败:', error);
         alert('获取学生信息失败: ' + (error.response ? error.response.data : '服务器不可达'));
       });
+    },
+
+    fetchAvailableExams() {
+      axios.get('http://localhost:8081/teacher/activeExams')
+      .then(response => {
+        this.exams = response.data;
+      })
+      .catch(error => {
+        console.error('获取可用考试列表失败:', error);
+        alert('获取可用考试列表失败: ' + (error.response ? error.response.data : '服务器不可达'));
+      });
+    },
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleString();
+    },
+    isExamAvailable(startTime) {
+      const now = new Date();
+      const start = new Date(startTime);
+      return now >= start;
+    },
+    countdown(startTime) {
+      const now = Date.now();
+      const start = new Date(startTime).getTime();
+      const diff = start - now;
+      if (diff > 0) {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        return `${hours}h ${minutes}m ${seconds}s`;
+      }
+      return 'Starting soon!';
     }
   },
   mounted() {
     this.fetchStudentInfo();
+    this.fetchAvailableExams();
+    setInterval(() => {
+      this.exams.forEach(exam => {
+        if (!this.isExamAvailable(exam.startTime)) {
+          this.countdown(exam.startTime);
+        }
+      });
+    }, 1000);
   }
 };
 </script>
+
 
 <style scoped>
 .student-dashboard {
@@ -180,5 +235,58 @@ export default {
   background-color: #1a73e8;
   color: white;
   border-color: #0b5ed7;
+}
+
+.exams-list {
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.exams-title {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.exams-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.exams-list li {
+  margin: 10px 0;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.exam-name {
+  color: red;
+  font-size: 25px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.exam-time {
+  font-weight: bold;
+}
+
+.countdown {
+  margin-left: 10px;
+  font-style: italic;
+}
+
+.exams-list button {
+  margin-left: 10px;
+  background: #4CAF50;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.exams-list button:hover {
+  background: #45a049;
 }
 </style>

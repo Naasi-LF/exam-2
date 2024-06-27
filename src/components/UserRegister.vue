@@ -49,7 +49,7 @@ export default {
     handleRegister() {
       axios.post('http://localhost:8081/students/register', this.registerInfo)
         .then(() => {
-          this.message = 'Registration successful!';
+          this.message = '注册成功';
           this.success = true;
           // Optionally redirect or perform other actions
         })

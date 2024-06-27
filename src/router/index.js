@@ -10,7 +10,7 @@ import PublishExam from '../components/PublishExam.vue';
 import ManageStudents from '../components/ManageStudents.vue';
 import ExamScores from '../components/ExamScores.vue';
 import EmailNotification from '../components/EmailNotification.vue';
-
+import ExamView from '../components/ExamView.vue'; // 导入新组件
 Vue.use(Router);
 
 const router = new Router({
@@ -37,6 +37,12 @@ const router = new Router({
           path: 'update-info',  // 作为子路由
           name: 'UpdateInfo',
           component: UpdateInfo  // 指定对应的组件
+        },
+        {
+          path: 'exam/:examId',  // 新添加的考试子路由
+          name: 'ExamView',
+          component: ExamView,
+          props: true
         }
       ]
     },
