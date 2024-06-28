@@ -13,17 +13,19 @@
     </div>
     <!-- 新增显示考试列表 -->
     <!-- 显示考试列表 -->
-      <div v-if="exams.length > 0" class="exams-list">
-        <h3 class="exams-title">可参加的考试:</h3>
-        <ul>
-          <li v-for="exam in exams" :key="exam.examId">
-            <span class="exam-name">{{ exam.examName }}</span> - 
-            <span class="exam-time">从 {{ formatDate(exam.startTime) }} 到 {{ formatDate(exam.endTime) }}</span>
-            <button v-if="isExamAvailable(exam.startTime)" @click="enterExam(exam.examId)">进入考试</button>
-            <span v-else class="countdown">{{ countdown(exam.startTime) }}</span>
-          </li>
-        </ul>
-      </div>
+    <!-- 显示考试列表 -->
+    <div v-if="exams.length > 0" class="exams-list">
+      <h3 class="exams-title">可参加的考试</h3>
+      <li v-for="exam in exams" :key="exam.examId">
+  <span class="exam-name">{{ exam.examName }}</span> ⏰
+  <span class="exam-time">从 {{ formatDate(exam.startTime) }} 到 {{ formatDate(exam.endTime) }}</span>
+  <button v-if="!exam.isSubmitted && exam.isAvailable"
+          @click="$router.push({ name: 'ExamView', params: { examId: exam.examId }})" class="button-enter-exam">进入考试</button>
+  <span v-else-if="!exam.isSubmitted && !exam.isAvailable" class="countdown">{{ countdown(exam.startTime) }}</span>
+  <span v-else class="submitted">已提交</span>
+</li>
+    </div>
+
 
     <router-view></router-view> <!-- 子路由内容显示在这里 -->
   </div>
@@ -109,15 +111,38 @@ export default {
     },
 
     fetchAvailableExams() {
-      axios.get('http://localhost:8081/teacher/activeExams')
+    axios.get('http://localhost:8081/teacher/activeExams')
       .then(response => {
-        this.exams = response.data;
+        this.exams = response.data.map(exam => ({
+          ...exam,
+          isSubmitted: false, // 默认设置为未提交
+          isAvailable: this.isExamAvailable(exam.startTime) // 判断考试是否已开始
+        }));
+        this.exams.forEach(exam => {
+          this.checkIfSubmitted(exam.examId); // 更新考试提交状态
+        });
       })
       .catch(error => {
         console.error('获取可用考试列表失败:', error);
-        alert('获取可用考试列表失败: ' + (error.response ? error.response.data : '服务器不可达'));
       });
-    },
+  },
+
+  checkIfSubmitted(examId) {
+    const studentId = sessionStorage.getItem('studentId');
+    axios.get(`http://localhost:8081/exams/${examId}/is-submitted/${studentId}`)
+      .then(response => {
+        const index = this.exams.findIndex(exam => exam.examId === examId);
+        if (index !== -1) {
+          this.$set(this.exams, index, {
+            ...this.exams[index],
+            isSubmitted: response.data // 确保正确更新isSubmitted状态
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error checking submission status:', error);
+      });
+  },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString();
     },
@@ -155,6 +180,8 @@ export default {
 
 
 <style scoped>
+
+
 .student-dashboard {
   display: flex;
   align-items: center;
@@ -241,12 +268,16 @@ export default {
   width: 100%;
   text-align: center;
   margin-top: 20px;
+  
 }
 
 .exams-title {
-  font-size: 24px;
-  color: #333;
+  font-size: 30px;
+  font-family: '华文彩云';
+  color: #095cf5;
   margin-bottom: 10px;
+  /* font-weight: bold; 加粗字体 */
+  background-color: #cfe8f1; /* 淡绿色背景 */
 }
 
 .exams-list ul {
@@ -260,11 +291,22 @@ export default {
   padding: 10px;
   border-radius: 5px;
 }
-
+.submitted {
+  color: #388E3C; /* 绿色，表示已完成或正面的结果 */
+  font-weight: bold; /* 加粗字体 */
+  margin-left: 10px; /* 左边距，保持元素间的空间 */
+  padding: 5px 10px; /* 内边距，增加可点击区域的大小，使其更易于点击 */
+  background-color: #E8F5E9; /* 淡绿色背景 */
+  border-radius: 5px; /* 圆角边框 */
+  box-shadow: 0 2px 2px rgba(0,0,0,0.1); /* 轻微的阴影，增加立体感 */
+  cursor: default; /* 默认光标，因为不是可点击的元素 */
+}
 .exam-name {
-  color: red;
-  font-size: 25px;
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(73, 164, 239);
+  color: #3550d7; /* 更鲜明的红色，突出显示考试名称 */
+  font-size: 25px; /* 字体大小调整 */
+  font-weight: bold; /* 字体加粗 */
+  margin-bottom: 5px; /* 增加与下面内容的间距 */
 }
 
 .exam-time {
@@ -289,4 +331,21 @@ export default {
 .exams-list button:hover {
   background: #45a049;
 }
+
+.button-enter-exam {
+  font-weight: bold; /* 加粗字体 */
+  background-color: #4CAF50; /* 按钮背景颜色 */
+  color: white; /* 按钮文字颜色 */
+  border: none; /* 去除边框 */
+  padding: 8px 16px; /* 内边距，使按钮更显著 */
+  font-size: 16px; /* 设置字体大小 */
+  border-radius: 4px; /* 圆角边框 */
+  cursor: pointer; /* 鼠标悬停时的指针形状 */
+  transition: background-color 0.3s; /* 过渡效果，使颜色变化更平滑 */
+}
+
+.button-enter-exam:hover {
+  background-color: #388E3C; /* 鼠标悬停时的背景颜色变化 */
+}
+
 </style>
