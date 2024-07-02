@@ -26,6 +26,9 @@
           </div>
         </form>
         <p v-if="message" :class="{ 'success-message': success, 'error-message': !success }">{{ message }}</p>
+        <div class="helper-button">
+          <a href="http://127.0.0.1:5000/" target="_blank" class="btn btn-info btn-lg">有问题？点击常览题库小助手问问吧！</a>
+        </div>
       </div>
     </div>
   </div>
@@ -46,7 +49,6 @@ export default {
     };
   },
   methods: {
-// 登录成功后的处理逻辑
     handleLogin() {
       const studentId = parseInt(this.loginInfo.username, 10);
 
@@ -77,11 +79,9 @@ export default {
         this.success = false;
       });
     },
-
-
-      goToRegister() {
-        this.$router.push({ name: 'UserRegister' });
-      }
+    goToRegister() {
+      this.$router.push({ name: 'UserRegister' });
+    }
   }
 };
 </script>
@@ -124,7 +124,6 @@ export default {
   height: 100px;
   transform: translateX(-120px) translateY(-50px); /* Moves right 50px and up 30px */
 }
-
 
 .title-container {
   display: flex;
@@ -222,5 +221,17 @@ export default {
 .error-message {
   color: red;
   margin-top: 10px;
+}
+
+.helper-button a {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: rgb(22, 68, 205);
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
 }
 </style>
